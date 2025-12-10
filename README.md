@@ -3,6 +3,8 @@ AI Support Agent using RAG (Supabase) to answer rulebook questions with Zendesk 
 
 # [Risiko AI Support Agent] 🤖
 
+<img width="1694" height="520" alt="Screenshot (69)" src="https://github.com/user-attachments/assets/e22607c6-55f5-4d5d-8226-e20776a347be" />
+
 ## 📋 Overview
 This project is an advanced AI automation workflow built in **n8n**. It acts as a specialized customer support agent capable of answering complex questions based on a specific PDF manual (RAG), with a robust fallback mechanism to human operators.
 
