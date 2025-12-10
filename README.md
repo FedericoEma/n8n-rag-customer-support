@@ -1,10 +1,7 @@
 # n8n-rag-customer-support
 AI Support Agent using RAG (Supabase) to answer rulebook questions with Zendesk fallback integration.
 
-# [Titolo del Progetto, es: Risiko AI Support Agent] 🤖
-
-![Banner o Screenshot del Workflow](link-all-immagine-qui.png)
-*(Qui carica uno screenshot dell'intero workflow di n8n, è scenografico)*
+# [Risiko AI Support Agent] 🤖
 
 ## 📋 Overview
 This project is an advanced AI automation workflow built in **n8n**. It acts as a specialized customer support agent capable of answering complex questions based on a specific PDF manual (RAG), with a robust fallback mechanism to human operators.
