@@ -1,0 +1,1202 @@
+{
+  "name": "W9 - FEDERICO EMANUELE",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Ciao! 🤠\nSono il tuo assistente per il gioco da tavolo Risiko!\n\nPosso aiutarti a capire le regole, chiarire dubbi e spiegare meccaniche di gioco. Cosa vuoi sapere?",
+        "options": {
+          "responseMode": "streaming"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1984,
+        10240
+      ],
+      "id": "512e7a8d-7e32-40b0-8ba1-ba1796008997",
+      "name": "When chat message received",
+      "webhookId": "129f60b0-929d-404d-8875-84e895e369b4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1984,
+        9696
+      ],
+      "id": "ec3b7cde-f859-407d-8735-eca2b78c7922",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "18n8tIuaq2-R-GDvORPmQX6wiZiCL8kqX",
+          "mode": "list",
+          "cachedResultName": "Regolamento-Risiko.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/18n8tIuaq2-R-GDvORPmQX6wiZiCL8kqX/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1760,
+        9696
+      ],
+      "id": "eacc5c68-4d6c-4b43-b460-7143855a0a53",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fA7pzpGiegH8kZxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "embeddingBatchSize": 250,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -1536,
+        9600
+      ],
+      "id": "8e04589b-08be-45f3-8325-6f140d44a5c6",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "4T2z801q1ar5WwbZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        9824
+      ],
+      "id": "9c1b9adb-1ce8-429d-852e-581fbe094b9b",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XR5WDO0TIHB8cAJM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -1408,
+        9824
+      ],
+      "id": "aa6d5d9f-3e03-4e46-9666-cf7014077214",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Sei un assistente specializzato in RISIKO!. Hai la conoscenza per rispondere dal manuale del gioco.\n\nCOMPORTAMENTO:\n1. Per OGNI domanda, usa SEMPRE il tool di ricerca nel Vector Store\n2. Basa le tue risposte ESCLUSIVAMENTE sulle informazioni trovate nel Vector Store\n3. Non inventare mai regole o informazioni che non hai trovato nei documenti\n\nGESTIONE RISPOSTE:\n- Se trovi informazioni utili nel regolamento:\n  • Fornisci una risposta chiara, dettagliata e amichevole.\n  • Riassumi la regola e cita eventuali esempi pratici.\n  • Restituisci solo il testo della risposta.\n\n\nGESTIONE TICKET ZENDESK:\n- Se NON trovi informazioni nel regolamento dopo aver usato il tool di ricerca:\n  1. Usa il tool \"Create a ticket in Zendesk\"\n     - Subject: \"Domanda su Risiko senza risposta nel regolamento\"\n     - Description: includi la domanda esatta dell’utente\n     - Priority: \"normal\"\n  2. Dopo aver creato il ticket, invia SOLO il seguente messaggio all’utente: \"Mi dispiace, non ho trovato questa informazione nel regolamento di Risiko. Ho aperto un ticket di supporto per te. Un operatore ti contatterà presto!\"\n  3. NON restituire nessun altro output al flusso principale dopo questo messaggio. Non inviare testo aggiuntivo, JSON, o dati strutturati. Non restituire output per Airtable.\n  4. Considera la risposta finale come conclusiva: termina l’esecuzione dell’agente dopo l’uso del tool.\n\n\n\n\nSTILE:\n- Usa un linguaggio semplice, naturale e sempre in italiano.\n- Evita qualsiasi formato Markdown o elenchi.\n- Separa le idee con interruzioni di riga.\n\nREGOLE DI FORMATTAZIONE:\n- Nessun markdown o simbolo speciale.\n- Solo testo semplice e coerente con il tono amichevole del gioco Risiko.\n\nRicorda:\nLa tua conoscenza è limitata solo al regolamento di Risiko.  \nSe devi creare un ticket, fallo e termina la conversazione senza fornire ulteriori output.\n",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -1600,
+        10032
+      ],
+      "id": "9679914f-3945-4357-a302-6b9765a5c6f3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        10256
+      ],
+      "id": "39d077a0-5cbf-4c4c-9f96-e7db23f98afb",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XR5WDO0TIHB8cAJM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1632,
+        10256
+      ],
+      "id": "79dfe723-5911-4f07-bcb8-1b018afd8f3a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search for rules of game RISIKO!",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -1504,
+        10256
+      ],
+      "id": "8ba8b2ae-69ec-45b2-ae14-51e69c40f16f",
+      "name": "Supabase Vector Store2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "4T2z801q1ar5WwbZ",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        10464
+      ],
+      "id": "a8bd4098-378b-4ccd-aa26-99827dcc6b4f",
+      "name": "Embeddings Google Gemini2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XR5WDO0TIHB8cAJM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "={{ $json.chatInput }}\n\nCommento di Federico:\n{{ $json.commento || 'Verificare questa domanda, l’assistente non ha trovato la regola corrispondente.' }}",
+        "jsonParameters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON_Parameters', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.zendeskTool",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        10256
+      ],
+      "id": "b5dd6c3e-d6f4-46a8-ab41-6ac4cc2c384b",
+      "name": "Create a ticket in Zendesk",
+      "credentials": {
+        "zendeskApi": {
+          "id": "FMKq8WxlNpQu0Ckz",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prendi l'output dell'AI Agent\nlet risposta = $input.item.json.output;\n\n// Rimuovi grassetto (**testo** o __testo__)\nrisposta = risposta.replace(/\\*\\*([^*]+)\\*\\*/g, '$1');\nrisposta = risposta.replace(/__([^_]+)__/g, '$1');\n\n// Rimuovi corsivo (*testo* o _testo_)\nrisposta = risposta.replace(/\\*([^*]+)\\*/g, '$1');\nrisposta = risposta.replace(/_([^_]+)_/g, '$1');\n\n// Rimuovi elenchi puntati (* item o - item o • item)\nrisposta = risposta.replace(/^\\s*[\\*\\-•]\\s+/gm, '');\n\n// Rimuovi liste numerate (1. item, 2. item, etc.)\nrisposta = risposta.replace(/^\\s*\\d+\\.\\s+/gm, '');\n\n// Rimuovi backtick (`codice`)\nrisposta = risposta.replace(/`([^`]+)`/g, '$1');\n\n// Rimuovi intestazioni (# Titolo, ## Sottotitolo)\nrisposta = risposta.replace(/^#+\\s+/gm, '');\n\n// Rimuovi righe vuote multiple (lascia max 2 newline consecutive)\nrisposta = risposta.replace(/\\n{3,}/g, '\\n\\n');\n\n// Rimuovi spazi extra all'inizio delle righe\nrisposta = risposta.replace(/^\\s+/gm, '');\n\n// Pulisci la risposta\nconst rispostaPulita = risposta.trim();\n\n// Determina se è stato trovato o meno\nconst nonTrovato = rispostaPulita.includes(\"non ho trovato questa informazione\");\nconst ticketMenzionato = rispostaPulita.toLowerCase().includes(\"ticket\") || rispostaPulita.toLowerCase().includes(\"supporto\");\n\n// Ritorna il JSON con tutti i dati mappati alle colonne di Airtable\nreturn {\n  json: {\n    Risposta: rispostaPulita,\n    Domanda: $input.item.json.chatInput || '',\n    Timestamp: new Date().toISOString(),\n    Trovato: !nonTrovato && !ticketMenzionato,\n    Ticket: nonTrovato || ticketMenzionato\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        10224
+      ],
+      "id": "ce690aa0-7f5b-41dd-beaf-ad25586cf696",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app4gfbiM0y8CiYLY",
+          "mode": "list",
+          "cachedResultName": "Esercizio 9",
+          "cachedResultUrl": "https://airtable.com/app4gfbiM0y8CiYLY"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblanz6aRQNtbNti7",
+          "mode": "list",
+          "cachedResultName": "Esercizio week 9",
+          "cachedResultUrl": "https://airtable.com/app4gfbiM0y8CiYLY/tblanz6aRQNtbNti7"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Risposta": "={{ $json.Risposta }}",
+            "Data e ora": "={{ $json.Timestamp }}",
+            "Domanda": "={{ $('When chat message received').item.json.chatInput }}",
+            "Sessione ID": "={{ $('When chat message received').item.json.sessionId }}"
+          },
+          "matchingColumns": [
+            "Domanda",
+            "Risposta",
+            "Data e ora"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Domanda",
+              "displayName": "Domanda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Risposta",
+              "displayName": "Risposta",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Data e ora",
+              "displayName": "Data e ora",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Sessione ID",
+              "displayName": "Sessione ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        10256
+      ],
+      "id": "4e547900-69ca-4a20-ab3b-3948dfcab412",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "DeP0SHMK6FH7izTa",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "67193749-bc3e-4a1d-a311-abb9b266441d",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Mi dispiace",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1008,
+        10240
+      ],
+      "id": "a5494b89-5b28-4f53-b8ac-17f9e3a68dc9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "## Download del regolamento\n\nHo inserito il pdf del regolamento di RISIKO! e col nodo si scarica da Drive. Successivamente, col nodo SUPABASE si procederà all'em",
+        "height": 208,
+        "width": 768
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2000,
+        9376
+      ],
+      "id": "2da8b325-8d79-4f99-8c2d-d4d588e5529d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## GESTIONE\n\nDopo il messaggio dell'utente, il bot risponderà a seconda delle conoscenze acquisite col manuale, basandosi solo su quello.\nPer quanto riguarda il caso in cui sappia come rispondere, procederà attraverso il nodo IF e proseguirà con il nodo CODE (per rimuovere eventuali segni di punteggiatura) e terminerà con AIRTABLE, in cui inserirà i dati di DOMANDA, RISPOSTA, DATA E ORA E  SESSION ID.",
+        "height": 176,
+        "width": 880,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        9984
+      ],
+      "id": "ac7785b5-3b5d-4e8f-b458-77474520b206",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "GESTIONE 2\n\nNel caso in cui non sappia rispondere, il tool CREATE A TICKET farà si che venga creato un ticket su Zendesk correttamente. Inoltre, attraverso il nodo IF, non proseguirà oltre, data la presenza di frasi come \"Mi dispiace\" (condizione imposta sul nodo IF e già menzionata dentro l'AI AGENT).",
+        "width": 496,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        10416
+      ],
+      "id": "2c9a4727-74c6-4591-8021-40568ccfabb3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "path": "3765abee-5b41-436f-a1ea-eec8c14e6097",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        9584
+      ],
+      "id": "da29f753-fca9-460d-a2b5-7cae6bea2996",
+      "name": "Webhook",
+      "webhookId": "3765abee-5b41-436f-a1ea-eec8c14e6097"
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        9584
+      ],
+      "id": "e125a707-1664-4c36-abba-e473f55194d6",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1056,
+        9584
+      ],
+      "id": "73d0698d-843a-4e0f-a6cc-cfe15b631653",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app4gfbiM0y8CiYLY",
+          "mode": "list",
+          "cachedResultName": "Esercizio 9",
+          "cachedResultUrl": "https://airtable.com/app4gfbiM0y8CiYLY"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblanz6aRQNtbNti7",
+          "mode": "list",
+          "cachedResultName": "Esercizio week 9",
+          "cachedResultUrl": "https://airtable.com/app4gfbiM0y8CiYLY/tblanz6aRQNtbNti7"
+        },
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "Domanda"
+            },
+            {
+              "field": "Risposta"
+            },
+            {
+              "field": "Data e ora"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        9584
+      ],
+      "id": "de28f13b-d8fd-46e3-9cd2-9dfb6bf3cfb4",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "DeP0SHMK6FH7izTa",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prendi tutti i record da Airtable (da Search records node)\nconst records = $input.all().map(item => item.json);\n\n// Funzione escape HTML\nfunction escapeHtml(text) {\n  if (!text) return '';\n  return String(text)\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&#039;\");\n}\n\n// Calcola statistiche\nconst totalRecords = records.length;\nconst ticketCount = records.filter(r => {\n  const resp = (r.Risposta || '').toLowerCase();\n  return resp.includes('ticket') || resp.includes('mi dispiace');\n}).length;\nconst resolvedCount = totalRecords - ticketCount;\nconst resolvedPercentage = totalRecords > 0 ? Math.round((resolvedCount / totalRecords) * 100) : 0;\n\n// Calcola temi più richiesti (con stopWords estese e filtro verbi)\nconst stopWords = new Set([\n  'di', 'a', 'in', 'con', 'su', 'per', 'il', 'la', 'i', 'le', 'un', 'una', 'che', 'non', 'è', 'e', 'ho', 'come', 'posso', 'cosa', 'risiko',\n  'sono', 'hai', 'può', 'devo', 'deve', 'puoi', 'vuoi', 'voglio', 'fare', 'avere', 'essere', 'quando', 'dove', 'perchè', 'perchè', 'quale', 'quali',\n  'questo', 'questa', 'questi', 'queste', 'quello', 'quella', 'quelli', 'quelle', 'mio', 'mia', 'miei', 'mie', 'tuo', 'tua', 'tuoi', 'tue',\n  'suo', 'sua', 'suoi', 'sue', 'nostro', 'nostra', 'nostri', 'nostre', 'vostro', 'vostra', 'vostri', 'vostre', 'loro',\n  'più', 'molto', 'poco', 'tanto', 'troppo', 'ogni', 'tutto', 'tutti', 'tutte', 'alcune', 'alcuni', 'nessuno', 'nessuna',\n  'anche', 'ancora', 'già', 'mai', 'sempre', 'spesso', 'volte', 'durante', 'dopo', 'prima', 'poi', 'quindi', 'però', 'oppure',\n  'ciao', 'grazie', 'prego', 'scusa', 'aiuto', 'aiutare', 'dire', 'sapere', 'capire', 'spiegare', 'chiedere',\n  'termina', 'terminare', 'presenti', 'presente', 'qual', 'comincia', 'inizia', 'finisce', 'invece', 'viene', 'vanno', 'fanno',\n  'servono', 'serve', 'usano', 'usare', 'hanno', 'aveva', 'avevo', 'potrei', 'vorrei', 'dovrei', 'sarebbe', 'fosse', 'siano',\n  'stata', 'stato', 'stati', 'state', 'stare', 'stai', 'stanno',\n  'quante', 'quanti', 'quanto', 'quanta', 'allinizio', 'necessari', 'necessarie', 'necessario', 'necessaria'\n]);\n\nconst wordCount = {};\nrecords.forEach(item => {\n  if (item.Domanda) {\n    item.Domanda.toLowerCase().split(/\\s+/).forEach(word => {\n      const cleanWord = word.replace(/[^\\wàèéìòù]/gi, '');\n      if (cleanWord.length >= 5 && \n          !stopWords.has(cleanWord) && \n          !cleanWord.endsWith('are') && \n          !cleanWord.endsWith('ere') && \n          !cleanWord.endsWith('ire') &&\n          !cleanWord.endsWith('ono') &&\n          !cleanWord.endsWith('ano')) {\n        wordCount[cleanWord] = (wordCount[cleanWord] || 0) + 1;\n      }\n    });\n  }\n});\n\nconst topThemes = Object.entries(wordCount)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 12)\n  .map(([word, count]) => `\n    <div class=\"col-md-3 col-sm-4 col-6 mb-3\">\n      <div class=\"theme-card p-3 text-center\">\n        <h5 class=\"mb-1\">${escapeHtml(word)}</h5>\n        <span class=\"badge bg-danger\">${count} richieste</span>\n      </div>\n    </div>\n  `).join('');\n\n// Tabella risposte (ultimi 30 record per performance)\nconst tableRows = records.slice(0, 30).map(item => {\n  const date = new Date(item['Data e ora'] || item.createdTime);\n  const dateStr = !isNaN(date.getTime()) ? date.toLocaleString('it-IT', { \n    day: '2-digit', \n    month: '2-digit', \n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit'\n  }) : 'N/A';\n  \n  const domanda = escapeHtml(item.Domanda || 'N/A');\n  const risposta = escapeHtml(item.Risposta || 'N/A');\n  const isTicket = risposta.toLowerCase().includes('ticket') || risposta.toLowerCase().includes('mi dispiace');\n  const statusClass = isTicket ? 'bg-warning text-dark' : 'bg-success';\n  const statusText = isTicket ? '⚠️ Ticket' : '✓ Risolta';\n  \n  return `\n    <tr>\n      <td class=\"text-nowrap\">${dateStr}</td>\n      <td><strong>${domanda}</strong></td>\n      <td>${risposta.substring(0, 120)}${risposta.length > 120 ? '...' : ''}</td>\n      <td><span class=\"badge ${statusClass}\">${statusText}</span></td>\n    </tr>\n  `;\n}).join('');\n\n// Grafico dati per giorno della settimana\nconst days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];\nconst dayCounts = new Array(7).fill(0);\n\nrecords.forEach(item => {\n  const dateStr = item['Data e ora'];\n  if (dateStr) {\n    const d = new Date(dateStr);\n    if (!isNaN(d.getTime())) {\n      const dayOfWeek = d.getDay();\n      dayCounts[dayOfWeek]++;\n    }\n  }\n});\n\nconst chartData = JSON.stringify({\n  labels: days,\n  datasets: [{\n    label: 'Risposte per giorno',\n    data: dayCounts,\n    backgroundColor: 'rgba(220, 53, 69, 0.8)',\n    borderColor: 'rgba(220, 53, 69, 1)',\n    borderWidth: 2,\n    borderRadius: 8\n  }]\n});\n\n// HTML completo con stile migliorato\nconst html = `<!DOCTYPE html>\n<html lang=\"it\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Dashboard Risiko Bot</title>\n  <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n  <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n  <style>\n    body {\n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      min-height: 100vh;\n      padding: 20px 0;\n      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n    }\n    .main-container {\n      background: white;\n      border-radius: 20px;\n      box-shadow: 0 20px 60px rgba(0,0,0,0.3);\n      padding: 40px;\n      max-width: 1400px;\n      margin: 0 auto;\n    }\n    h1 {\n      color: #dc3545;\n      font-weight: 700;\n      margin-bottom: 10px;\n      text-align: center;\n    }\n    .subtitle {\n      text-align: center;\n      color: #6c757d;\n      margin-bottom: 40px;\n      font-size: 1.1rem;\n    }\n    .stats-card {\n      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);\n      color: white;\n      border-radius: 15px;\n      padding: 25px;\n      margin-bottom: 30px;\n      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);\n    }\n    .stat-item {\n      text-align: center;\n    }\n    .stat-number {\n      font-size: 2.5rem;\n      font-weight: 700;\n      display: block;\n    }\n    .stat-label {\n      font-size: 0.9rem;\n      opacity: 0.9;\n      text-transform: uppercase;\n      letter-spacing: 1px;\n    }\n    .section-title {\n      color: #dc3545;\n      font-weight: 600;\n      margin: 40px 0 20px 0;\n      padding-bottom: 10px;\n      border-bottom: 3px solid #dc3545;\n    }\n    .theme-card {\n      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);\n      border-radius: 12px;\n      transition: all 0.3s ease;\n      border: 2px solid transparent;\n    }\n    .theme-card:hover {\n      transform: translateY(-5px);\n      border-color: #dc3545;\n      box-shadow: 0 8px 20px rgba(220, 53, 69, 0.2);\n    }\n    .theme-card h5 {\n      color: #495057;\n      font-weight: 600;\n      font-size: 1rem;\n    }\n    .table-container {\n      background: #f8f9fa;\n      border-radius: 15px;\n      padding: 20px;\n      margin-top: 20px;\n      max-height: 600px;\n      overflow-y: auto;\n    }\n    .table {\n      background: white;\n      border-radius: 10px;\n      overflow: hidden;\n    }\n    .table thead {\n      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);\n      color: white;\n    }\n    .table thead th {\n      border: none;\n      padding: 15px;\n      font-weight: 600;\n      text-transform: uppercase;\n      font-size: 0.85rem;\n      letter-spacing: 0.5px;\n    }\n    .table tbody tr {\n      transition: all 0.2s ease;\n    }\n    .table tbody tr:hover {\n      background-color: #f8f9fa;\n      transform: scale(1.01);\n    }\n    .table tbody td {\n      padding: 12px 15px;\n      vertical-align: middle;\n      border-bottom: 1px solid #dee2e6;\n    }\n    .chart-container {\n      background: white;\n      border-radius: 15px;\n      padding: 30px;\n      box-shadow: 0 4px 15px rgba(0,0,0,0.1);\n      margin-top: 20px;\n    }\n    canvas {\n      max-height: 350px !important;\n    }\n    .badge {\n      padding: 8px 15px;\n      font-size: 0.85rem;\n      font-weight: 600;\n    }\n    @media (max-width: 768px) {\n      .main-container {\n        padding: 20px;\n      }\n      .stat-number {\n        font-size: 2rem;\n      }\n      .table-container {\n        padding: 10px;\n      }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"main-container\">\n    <h1>🎲 Dashboard Risiko Bot</h1>\n    <p class=\"subtitle\">Analisi completa delle interazioni e performance</p>\n    \n    <div class=\"stats-card\">\n      <div class=\"row\">\n        <div class=\"col-md-4 stat-item\">\n          <span class=\"stat-number\">${totalRecords}</span>\n          <span class=\"stat-label\">Totale Risposte</span>\n        </div>\n        <div class=\"col-md-4 stat-item\">\n          <span class=\"stat-number\">${resolvedCount}</span>\n          <span class=\"stat-label\">Risolte</span>\n        </div>\n        <div class=\"col-md-4 stat-item\">\n          <span class=\"stat-number\">${resolvedPercentage}%</span>\n          <span class=\"stat-label\">Tasso Successo</span>\n        </div>\n      </div>\n    </div>\n    \n    <h3 class=\"section-title\">🔥 Temi Più Richiesti</h3>\n    <div class=\"row\">\n      ${topThemes || '<p class=\"text-center text-muted\">Nessun tema disponibile</p>'}\n    </div>\n    \n    <h3 class=\"section-title\">📊 Distribuzione Risposte per Giorno</h3>\n    <div class=\"chart-container\">\n      <canvas id=\"myChart\"></canvas>\n    </div>\n    \n    <h3 class=\"section-title\">📋 Ultime Risposte (30 più recenti)</h3>\n    <div class=\"table-container\">\n      <table class=\"table table-hover\">\n        <thead>\n          <tr>\n            <th style=\"width: 140px;\">Data</th>\n            <th style=\"width: 30%;\">Domanda</th>\n            <th>Risposta</th>\n            <th style=\"width: 100px;\">Stato</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${tableRows || '<tr><td colspan=\"4\" class=\"text-center text-muted\">Nessuna risposta disponibile</td></tr>'}\n        </tbody>\n      </table>\n    </div>\n  </div>\n  \n  <script>\n    const ctx = document.getElementById('myChart').getContext('2d');\n    new Chart(ctx, {\n      type: 'bar',\n      data: ${chartData},\n      options: {\n        responsive: true,\n        maintainAspectRatio: true,\n        plugins: {\n          legend: {\n            display: true,\n            position: 'top',\n            labels: {\n              font: { size: 14, weight: '600' },\n              color: '#495057'\n            }\n          },\n          tooltip: {\n            backgroundColor: 'rgba(0,0,0,0.8)',\n            padding: 12,\n            titleFont: { size: 14 },\n            bodyFont: { size: 13 }\n          }\n        },\n        scales: {\n          y: {\n            beginAtZero: true,\n            ticks: {\n              stepSize: 1,\n              font: { size: 12 }\n            },\n            grid: {\n              color: 'rgba(0,0,0,0.05)'\n            }\n          },\n          x: {\n            ticks: {\n              font: { size: 12, weight: '600' }\n            },\n            grid: {\n              display: false\n            }\n          }\n        }\n      }\n    });\n  </script>\n</body>\n</html>`;\n\nreturn [{ json: { html } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        9584
+      ],
+      "id": "844480b5-2e82-40d7-a9c9-1aff3e33d5a3",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "## EXTRA MILE\n",
+        "height": 752,
+        "width": 2224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        9520
+      ],
+      "id": "14e577e1-eaea-47b5-b2b1-873bfc930f06",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "9b510f18-a6cb-43a6-9876-83bb7d7dde3a",
+      "name": "Weekly Report Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        9984
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app4gfbiM0y8CiYLY"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblanz6aRQNtbNti7"
+        },
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "Risposta"
+            }
+          ]
+        }
+      },
+      "id": "75a669ec-9bae-4dcb-b0c3-e8ed0a15fa91",
+      "name": "Get All Responses",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        9984
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "DeP0SHMK6FH7izTa",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "responses",
+        "options": {}
+      },
+      "id": "1f5b7e96-13f5-46ae-9abd-cd9e0d73037a",
+      "name": "Aggregate Responses",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        544,
+        9984
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze these Risiko chatbot responses and identify critical issues: {{ JSON.stringify($json.responses) }} \n",
+        "options": {
+          "systemMessage": "You are a data analyst specialized in identifying critical issues from customer support interactions.\n\nYour task:\n1. Analyze the provided chatbot responses from Airtable\n2. Identify CRITICAL ISSUES including:\n   - Frequently asked questions that indicate confusion\n   - Topics with multiple similar questions (potential documentation gaps)\n   - Questions that resulted in Zendesk tickets (unanswered by bot)\n   - Patterns in user confusion or frustration\n   - Areas where the rulebook may be unclear\n\n3. Create a structured report in Italian with:\n   - Executive Summary (Riepilogo Esecutivo)\n   - Top 5 Critical Issues (Le 5 Criticità Principali)\n   - Detailed Analysis for each issue (Analisi Dettagliata)\n   - Recommendations (Raccomandazioni)\n   - Statistics (Statistiche)\n\n4. Format the output as plain text suitable for a Google Doc, using clear headings and bullet points.\n\n5. Be specific: cite actual questions from users and provide actionable insights.\n\nOUTPUT FORMATTING RULES (VERY IMPORTANT):\n\nYour sole function is to generate a plain text report to be inserted into a Google Doc.\n\n1.  **ABSOLUTE MARKDOWN PROHIBITION:**\n    NEVER use Markdown syntax. This includes, but is not limited to:\n    * No bold (DO NOT use `**text**`).\n    * No italics (DO NOT use `*text*`).\n    * No bullet points (DO NOT start lines with `*` or `•`).\n    * No headers (DO NOT use `#` or `##`).\n\n2.  **PROFESSIONAL STRUCTURE (The \"Polished\" Look):**\n    To create a report that is \"polished\" and professional without Markdown, you MUST follow these text formatting rules:\n\n    * **Section Titles:** Write main section titles (e.g., \"EXECUTIVE SUMMARY\", \"THE 5 KEY CRITICAL ISSUES\") entirely in ALL CAPS.\n    * **Separators:** Before a new all-caps section title, insert a blank line to clearly separate it from the preceding text.\n    * **Paragraphs:** Separate each text paragraph using a double line break (leaving one completely blank line between paragraphs).\n    * **Lists:** If you need to list items (like critical issues or recommendations), DO NOT use `*`. Instead, start the line with a number followed by a period and a space (e.g., `1. `) or a simple dash followed by a space (e.g., `- `).\n\nExample of correct output:\n\nEXECUTIVE SUMMARY\n\nThis report analyzes last week's interactions. The main critical issues concern the attack phase.\n\nA review of the manual on that point is recommended.\n\n---\n\nTHE 5 KEY CRITICAL ISSUES\n\n1. Confusion about calculating dice in an attack. Users often ask how many dice to roll.\n\n2. Doubts about the initial distribution of tanks.\n\n3. Questions about the role of objective cards.\n\nOutput language: Italian"
+        }
+      },
+      "id": "a75a4966-c11e-4c1e-99a3-cd098a4435b5",
+      "name": "Criticality Analysis Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        752,
+        9920
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0f52d43a-88ad-4db4-8858-0f596e57c872",
+      "name": "Google Gemini Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        752,
+        10080
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XR5WDO0TIHB8cAJM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "=Report Criticità Risiko Bot - {{ $now.toFormat(\"dd/MM/yyyy\") }}"
+      },
+      "id": "528aa77f-a8db-4c52-8308-b70096ff67be",
+      "name": "Create Report in Google Docs",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        9920
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "kOXOvGckXN1rEdf4",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "federico.emanuele@outlook.com",
+        "subject": "=Report Settimanale Criticità Risiko Bot - {{ $now.toFormat(\"dd/MM/yyyy\") }}",
+        "message": "=Buongiorno,\n\nIn allegato può trovare il report settimanale delle criticità identificate dal bot Risiko.\n\nCordiali saluti,\n\nTeam di n8n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "id": "1470040b-b917-4665-bc7f-c906a464a118",
+      "name": "Send Report via Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1952,
+        9936
+      ],
+      "webhookId": "9c56811b-b686-49d6-ab84-eede0b111f8c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MrBtBgYVXXZ80aSV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('Criticality Analysis Agent').item.json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        9920
+      ],
+      "id": "c33fbd40-8c3c-4c90-933f-70bd5bad0389",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "kOXOvGckXN1rEdf4",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ESERCIZIO BASE \n",
+        "height": 1392,
+        "width": 2320,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2432,
+        9280
+      ],
+      "id": "2099e11f-bbd0-4a00-9a90-c93e95b78648",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "Report.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1744,
+        9936
+      ],
+      "id": "70fb19e6-2130-4acf-8509-a0ba458910ef",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fA7pzpGiegH8kZxU",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.documentId }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        9920
+      ],
+      "id": "587f9916-92ad-4bae-97a7-d0eaae08dced",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "kOXOvGckXN1rEdf4",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Spiegazione\n\nHo ottenuto le risposte di AirTable e col nodo successivo (CODE) ho preparato la formattazione per la creazione di una pagina (avvenuta col nodo HTML).",
+        "height": 176,
+        "width": 432,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        9344
+      ],
+      "id": "83bcb6e9-9fec-481e-8616-07c67b6afaec",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Spiegazione 2\n\nAvendo ottenuto tutti i dati riguardante la tabella di AirTable, li ho fatti analizzare facendo identificare eventuali criticità. In seguito, ho creato il documento su Docs e inserito il testo dell'AI. Infine, ho inviato l'email con l'allegato.",
+        "width": 624,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        10272
+      ],
+      "id": "d47aabb6-39cd-47d2-9e7d-17e352cdc560",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "fedemanuele.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, br",
+            "accept-language": "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7,es;q=0.6",
+            "cache-control": "max-age=0",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "79.50.195.147",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "IT",
+            "cf-ray": "99e11b508596edaa-MXP",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2Ba9s47QABMIIklYjTzdRkh7t599%2BUegsY%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX1%2F0rzQ7jO5i%2BBqS6Lh9qBh2OQS1%2B62Vvic%3D; _fbp=fb.1.1758012995486.912766442283478929; _gcl_au=1.1.4366900.1757958038; _ga=GA1.1.120733968.1757958040; _ga_0SC4FF2FH9=GS2.1.s1762772380$o19$g1$t1762772573$j40$l0$h0; n8n_anonymous_id=bd67a45c-f422-4024-a858-445e03334394; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX19m5e7BZbpX%2ByueKmUAu4gu50Zu8doo0IUW1zF96p90eDqhxIN0DIxLkNLIntCdIv1Vw%2BoscH2zLQ%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2Bkm6lCyyncVf2KkLhwqhzTWhSPm7eJNQeeTys47X4PVTVJzS7M6DFNjvgY9kvjF65cL6boxMbogWmxOi2Q779lWQJBSW3mtquL3S61QSi29bdJL%2FEW32yFmH%2Bt8Y3SFXjitUrj8dxDR%2B1mqiiR5284iObQxi0nN1k%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19DrVdnbFa8JiPi%2Bu4d25O4sjUsCU0guUwxr2XpILefxSWEOmykU1GDK6wGGzhXljgaEH1FzzWlpOq95knuCCuWvdkJPiKPDj0wV%2BzohMTFE5NSNB1txUV5GitHIj3Kgl8RYQTOvh%2B2n73y6m0Lpt4r%2FIN76Gesr5uNUXbAhiShEl7pP8%2FtrR142g%2FX2bYmenm%2FvPaDM5viqA%3D%3D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2Bso50QkjdgsfL8d4zxtB7m%2FF%2BJrLY%2F0WBRXcvkkV2QmSBEutf04Ydchy%2Ba%2BexvKu4iwYz2A9ukujP9ySuwkcGfNhazKpFVdudqQ%2F%2BpTv8AMwv1Jrht%2FF67Vi41Eenqf0mDKos6TXAeBA%3D%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%225de3f6438e5159a6008687b3ae4d80f0b5de8e4eb1789b8f1cb51c9492361f92%2397206601-5477-45de-a9e1-6a87999f174c%22%2C%22%24sesid%22%3A%5B1763066591426%2C%22019a7ee4-6aec-718f-b9a6-c374784cd4a4%22%2C1763065490153%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22https%3A%2F%2Ffedemanue.app.n8n.cloud%2Fworkflow%2Fuzu1uCL6pBbZBwKZ%22%2C%22u%22%3A%22https%3A%2F%2Ffedemanue.app.n8n.cloud%2Fsignout%22%7D%7D",
+            "if-none-match": "W/\"381d-7nBZzQZX1h4dBU5RMLGl26+ROq4\"",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "x-forwarded-for": "79.50.195.147, 172.70.216.69",
+            "x-forwarded-host": "fedemanuele.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-66-55c5c9b85f-8mvzh",
+            "x-is-trusted": "yes",
+            "x-real-ip": "79.50.195.147"
+          },
+          "params": {},
+          "query": {},
+          "body": {},
+          "webhookUrl": "https://fedemanuele.app.n8n.cloud/webhook/3765abee-5b41-436f-a1ea-eec8c14e6097",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a ticket in Zendesk": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Report Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get All Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Responses": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Responses": {
+      "main": [
+        [
+          {
+            "node": "Criticality Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Criticality Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criticality Analysis Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Report in Google Docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Report in Google Docs": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Send Report via Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5fe3f6c9-41ab-41c4-ba44-d6e1f26c1de1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5de3f6438e5159a6008687b3ae4d80f0b5de8e4eb1789b8f1cb51c9492361f92"
+  },
+  "id": "woDlOOhrPaDswKhr",
+  "tags": []
+}
