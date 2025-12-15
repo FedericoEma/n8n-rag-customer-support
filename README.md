@@ -1,7 +1,8 @@
 # n8n-rag-customer-support
 AI Support Agent using RAG (Supabase) to answer rulebook questions with Zendesk fallback integration.
+Disclaimer: This project is a personal tech demo for educational purposes only. It is not affiliated with, endorsed by, or connected to Editrice Giochi, Spin Master, or the official RisiKo! brand. All trademarks and copyrights belong to their respective owners.
 
-# [Risiko AI Support Agent] 🤖
+# AI Rule Assistant (Demo on Risiko Rules) 🤖
 
 <img width="1661" height="540" alt="Screenshot (75)" src="https://github.com/user-attachments/assets/02046f1e-f3e6-4ffa-b0bd-2ff916b923a4" />
 
